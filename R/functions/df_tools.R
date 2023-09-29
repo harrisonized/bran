@@ -1,9 +1,21 @@
+wd = dirname(dirname(this.path::here()))
+source(file.path(wd, 'R', 'functions', 'list_tools.R')) 
+
 ## Functions
+## rename_columns
 ## rev_df
 ## smelt
 ## reset_index
 ## filter_dataframe_column_by_list
 ## pivot
+
+
+#' rename specific dataframe columns
+#' 
+#' @export
+rename_columns <- function(df, columns) {
+    colnames(df) <- replace_specific_items(colnames(df), columns)
+}
 
 
 #' Reverse a dataframe
