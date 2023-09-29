@@ -4,6 +4,7 @@ source(file.path(wd, 'R', 'functions', 'list_tools.R'))
 ## Functions
 ## rename_columns
 ## rev_df
+## fillna
 ## smelt
 ## reset_index
 ## filter_dataframe_column_by_list
@@ -13,8 +14,28 @@ source(file.path(wd, 'R', 'functions', 'list_tools.R'))
 #' rename specific dataframe columns
 #' 
 #' @export
-rename_columns <- function(df, columns) {
+rename_columns <- function(df, columns, inplace=FALSE) {
     colnames(df) <- replace_specific_items(colnames(df), columns)
+    if (inplace) {
+        # see: https://stackoverflow.com/questions/3969852/update-data-frame-via-function-doesnt-work
+        assign('df', df, envir=.GlobalEnv)
+    } else {
+        return(df)
+    }
+}
+
+
+#' fill a specific column with na
+#' 
+#' @export
+fillna <- function(df, col, val=0, inplace=FALSE) {
+    df[is.na(df[, col]), col] <- val
+    if (inplace) {
+        # see: https://stackoverflow.com/questions/3969852/update-data-frame-via-function-doesnt-work
+        assign('df', df, envir=.GlobalEnv)
+    } else {
+        return(df)
+    }
 }
 
 
