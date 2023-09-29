@@ -1,0 +1,1 @@
+sample\_ped\_tab.csv is downloaded from [here](https://github.com/mayoverse/kinship2/tree/master/data) as part of the [kinship2 Github repository](https://github.com/mayoverse/kinship2).
