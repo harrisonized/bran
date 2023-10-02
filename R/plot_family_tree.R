@@ -94,6 +94,9 @@ preprocessing <- function(df) {
     colnames(df) <- unlist(lapply(colnames(df), dotsep_to_snake_case))
     df <- rename_columns(df, col_to_new_col)
 
+    # drop duplicated mice
+    df <- df[!duplicated(df[['mouse_id']]), ]
+
     # impute missing columns
     if (!('pcr_confirmation' %in% colnames(df))){
         df[['pcr_confirmation']] = NA
