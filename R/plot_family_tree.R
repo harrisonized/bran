@@ -181,10 +181,16 @@ tree <- pedigree(
     sex = df[['sex']],
     famid = rep(1, nrow(df))
 )[1]
+
 if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     names = df[['mouse_id']]
 } else {
-    names = paste0(df[['mouse_id']], '\n', df[['age']], 'd')
+    rack_names = gsub(".* ([0-9]+[Aa|Bb]).*", "\\1", df[['rack']])  # regex match Rack 1A
+    names = paste0(
+        df[['mouse_id']], '\n',
+        df[['age']], 'd', '\n',
+        rack_names, ', ', df[['position']]
+    )
 }
 
 # save
