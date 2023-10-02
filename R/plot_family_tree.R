@@ -3,7 +3,8 @@
 
 wd = dirname(this.path::here())  # wd = '~/github/R/harrisonRTools'
 library('kinship2')
-library('tibble')
+suppressMessages(library('plyr'))
+library('readxl')
 library('RColorBrewer')
 library('optparse')
 library('logr')
@@ -92,10 +93,12 @@ preprocessing <- function(df) {
 
     # rename columns
     colnames(df) <- unlist(lapply(colnames(df), dotsep_to_snake_case))
+    colnames(df) <- unlist(lapply(colnames(df), title_to_snake_case))
     df <- rename_columns(df, col_to_new_col)
 
-    # drop duplicated mice
-    df <- df[!duplicated(df[['mouse_id']]), ]
+    # cleanup
+    df <- df[which(!(is.na(df[, 'mouse_id']) | is.na(df[, 'strain']))), ]  # drop missing mice
+    df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
 
     # impute missing columns
     if (!('pcr_confirmation' %in% colnames(df))){
@@ -108,7 +111,7 @@ preprocessing <- function(df) {
     # impute missing parents
     missing_parents <- generate_missing_parents(df)
     if (!is.null(missing_parents)) {
-        df <- add_row(df, missing_parents)
+        df <- plyr::rbind.fill(df, missing_parents)
     }
 
     # impute missing values
@@ -120,6 +123,11 @@ preprocessing <- function(df) {
         df[df[['mouse_id']]==df[[col]], c('father_id', 'mother_id')] <- 0
     }
 
+    # fix data types
+    for (col in c('mouse_id', 'father_id', 'mother_id')) {
+        df[[col]] <- as.numeric(df[[col]])
+    }
+    
     return(df)
 }
 
@@ -127,7 +135,17 @@ preprocessing <- function(df) {
 # ----------------------------------------------------------------------
 # Read Data
 
-df <- read.csv(file.path(wd, opt[['input-file']]), header=TRUE)
+ext = tools::file_ext(opt[['input-file']])
+if (ext == 'xlsx') {
+    df <- read_excel(file.path(wd, opt[['input-file']]))
+    df = subset(df, select = items_in_a_not_b(colnames(df), '...1'))
+} else if (ext == 'csv') {
+    df <- read.csv(file.path(wd, opt[['input-file']]), header=TRUE)
+} else {
+    log_print(paste(Sys.time(), 'Please enter a xlsx or csv file.'))
+    stop()
+}
+
 if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     rename_columns(df, c("affected"="pcr_confirmation", "avail"="dead"), inplace=TRUE)
 }
