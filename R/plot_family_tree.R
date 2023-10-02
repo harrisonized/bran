@@ -101,11 +101,11 @@ preprocessing <- function(df) {
     df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
 
     # impute missing columns
-    if (!('pcr_confirmation' %in% colnames(df))){
-        df[['pcr_confirmation']] = NA
-    }
     if (!('dead' %in% colnames(df))){
         df[['dead']] = 0
+    }
+    if (!('pcr_confirmation' %in% colnames(df))){
+        df[['pcr_confirmation']] = NA
     }
 
     # impute missing parents
@@ -150,6 +150,7 @@ if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     rename_columns(df, c("affected"="pcr_confirmation", "avail"="dead"), inplace=TRUE)
 }
 df <- preprocessing(df)
+df <- df[order(df[, 'strain'], df[, 'mouse_id']), ]
 
 # autoassign colors
 strains <- unique(df[['strain']])
@@ -219,3 +220,9 @@ if (!troubleshooting) {
          cex = 0.7
     )
 }
+
+end_time = Sys.time()
+log_print(paste('Script ended at:', Sys.time()))
+log_print(paste("Script completed in:", difftime(end_time, start_time)))
+log_close()
+
