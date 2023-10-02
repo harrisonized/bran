@@ -158,7 +158,7 @@ names(strains_to_color) = sort(strains)
 df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
 
 # save
-if (troubleshooting) {
+if (!troubleshooting) {
     directory = file.path(wd, dirname(opt[['input-file']]), 'troubleshooting')
     if (!dir.exists(directory)) {
         dir.create(directory, recursive=TRUE)
