@@ -29,12 +29,20 @@ items_in_a_not_b <- function(a, b) {
 #' filter_list_for_match(c("gene_id_pat", "gene_id_mat", "count"), "pat")
 #' 
 #' @export
-filter_list_for_match <- function(items, pattern) {
+filter_list_for_match <- function(items, patterns) {
     # filter
-    for (i in 1:length(pattern)){
-        items <- lapply(items, grep, pattern=pattern[[i]], value=TRUE)
+    for (i in 1:length(patterns)){
+        items <- lapply(items, grep, pattern=patterns[[i]], value=TRUE)
     }
     return (unlist(items[!sapply(items, identical, character(0))]))  # remove character(0)
+}
+
+
+#' return the first match given a pattern
+#'
+#' @export
+find_first_match_index <- function(pattern, items) {
+    return (grep(pattern, items)[[1]])
 }
 
 
