@@ -30,6 +30,14 @@ option_list = list(
                 metavar="FALSE", type="logical",
                 help="use example file instead of real file"),
 
+    make_option(c("-w", "--width"), default=5000,
+                metavar="5000", type="integer",
+                help="width in px"),
+
+    make_option(c("-l", "--height"), default=3000,
+                metavar="3000", type="integer",
+                help="height in px, -h is protected, -l for length"),
+
     make_option(c("-t", "--troubleshooting"), default=FALSE, action="store_true",
                 metavar="FALSE", type="logical",
                 help="enable if troubleshooting to prevent overwriting your files")
@@ -206,7 +214,8 @@ if (!troubleshooting) {
     )
 
     png(filepath,
-        width = 5000, height = 3000, units = "px", bg = "white",
+        width = opt[['width']], height = opt[['height']],
+        units = "px", bg = "white",
         res = 1200, pointsize = 5
     )
 
