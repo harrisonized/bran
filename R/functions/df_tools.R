@@ -1,5 +1,7 @@
-wd = dirname(dirname(this.path::here()))
-source(file.path(wd, 'R', 'functions', 'list_tools.R')) 
+source(file.path(
+    dirname(dirname(this.path::here())),  # wd
+    'R', 'functions', 'list_tools.R')
+) 
 
 ## Functions
 ## rename_columns
