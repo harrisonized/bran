@@ -1,16 +1,16 @@
 ## Example code to use kinship2
 ## See: https://cran.r-project.org/web/packages/kinship2/vignettes/pedigree.html
 
-wd = dirname(this.path::here())  # wd = '~/github/R/harrisonRTools'
+wd = dirname(this.path::here())  # wd = '~/github/R/bran'
 library('kinship2')
 suppressMessages(library('plyr'))
 library('readxl')
 library('RColorBrewer')
 library('optparse')
 library('logr')
-source(file.path(wd, 'R', 'functions', 'list_tools.R'))
-source(file.path(wd, 'R', 'functions', 'text_tools.R'))
-source(file.path(wd, 'R', 'functions', 'df_tools.R'))
+source(file.path(wd, 'R', 'functions', 'list_tools.R'))  # items_in_a_not_b
+source(file.path(wd, 'R', 'functions', 'text_tools.R'))  # dotsep_to_snake_case, title_to_snake_case
+source(file.path(wd, 'R', 'functions', 'df_tools.R'))  # rename_columns
 
 
 # ----------------------------------------------------------------------
@@ -18,9 +18,9 @@ source(file.path(wd, 'R', 'functions', 'df_tools.R'))
 
 # args
 option_list = list(
-    make_option(c("-i", "--input-file"), default='data/family-tree/mice.csv',
-                metavar='data/family-tree/mice.csv',
-                type="character",help="path/to/sample_ped_tab.csv"),
+    make_option(c("-i", "--input-file"), default='data/family-tree/sample_ped_tab.csv',
+                metavar='data/family-tree/sample_ped_tab.csv',
+                type="character",help="path/to/input/file"),
    
     make_option(c("-o", "--output-dir"), default="figures/family-tree",
                 metavar="figures/family-tree", type="character",
@@ -46,12 +46,12 @@ opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 troubleshooting = opt[['troubleshooting']]
 if (opt[['use-example']]) {
-    opt[['input-file']] = 'data/familytree/sample_ped_tab.csv'
+    opt[['input-file']] = 'data/family-tree/sample_ped_tab.csv'
 }
 
 # Start Log
 start_time = Sys.time()
-log <- log_open(paste0("plot_familytree-",
+log <- log_open(paste0("plot_family_tree-",
                        strftime(start_time, format="%Y%m%d_%H%M%S"), '.log'))
 log_print(paste('Script started at:', start_time))
 
@@ -87,7 +87,7 @@ generate_missing_parents <- function(df) {
                 mouse_id = missing_parents,
                 father_id = 0,
                 mother_id = 0,
-                dead = 0
+                alive = 1
             )
             result <- rbind(result, missing_parents_df)
         }
@@ -109,8 +109,12 @@ preprocessing <- function(df) {
     df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
 
     # impute missing columns
-    if (!('dead' %in% colnames(df))){
-        df[['dead']] = 0
+    if (!('alive' %in% colnames(df))){
+        if ('dead' %in% colnames(df)) {
+            df[['alive']] = 1-df[['dead']]
+        } else {
+            df[['alive']] = 1
+        }
     }
     if (!('pcr_confirmation' %in% colnames(df))){
         df[['pcr_confirmation']] = NA
@@ -124,7 +128,7 @@ preprocessing <- function(df) {
 
     # impute missing values
     # NOTE: inplace does not work within functions
-    df <- fillna(df, c('father_id', 'mother_id', 'dead'), 0)
+    df <- fillna(df, c('father_id', 'mother_id', 'alive'), 1)
 
     # remove self parents
     for (col in c('father_id', 'mother_id')) {
@@ -155,7 +159,7 @@ if (ext == 'xlsx') {
 }
 
 if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
-    rename_columns(df, c("affected"="pcr_confirmation", "avail"="dead"), inplace=TRUE)
+    rename_columns(df, c("avail"="dead"), inplace=TRUE)
 }
 df <- preprocessing(df)
 df <- df[order(df[, 'strain'], df[, 'mouse_id']), ]
@@ -197,9 +201,16 @@ if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     rack_names = gsub(".* ([0-9]+[Aa|Bb]).*", "\\1", df[['rack']])  # regex match Rack 1A
     names = paste0(
         df[['mouse_id']], '\n',
-        df[['age']], 'd', '\n',
-        rack_names, ', ', df[['position']]
+        rack_names, ', ', df[['position']], '\n',
+        df[['dob']], '\n',
+        df[['age']], 'd'
     )
+}
+
+if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
+    affected <- df[["affected"]]
+} else {
+    affected <- as.matrix(df[, c('chr_m', 'chr_p')])
 }
 
 # save
@@ -221,17 +232,19 @@ if (!troubleshooting) {
 
     plot(tree,
          id = names,
-         affected = df[['pcr_confirmation']],
-         status = df[['dead']],
+         affected = affected,
+         status = 1-df[['alive']],
          col = df[['color']],
-         width = 8, branch = 1,
-         symbolsize = 0.7,
-         cex = 0.7
+         symbolsize = 0.8,
+         cex = 0.6,
+         angle = rep(0, length(df)),
+         density = rep(100, length(df))
     )
+
+    dev.off()
 }
 
 end_time = Sys.time()
 log_print(paste('Script ended at:', Sys.time()))
 log_print(paste("Script completed in:", difftime(end_time, start_time)))
 log_close()
-
