@@ -64,10 +64,7 @@ log_print(paste('Script started at:', start_time))
 # ----------------------------------------------------------------------
 # Read Data
 
-df = read_excel_or_csv(
-    filepath=file.path(wd, opt[['input-file']]),
-    ext=tools::file_ext(opt[['input-file']])
-)
+df = read_excel_or_csv(file.path(wd, opt[['input-file']]))
 if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     rename_columns(df, c("avail"="dead"), inplace=TRUE)
 }

@@ -4,7 +4,6 @@
 ## Functions
 ## generate_missing_parents
 ## preprocessing
-## read_excel_or_csv
 
 
 #' used to match data from sample_ped_tab.csv to transnetyx output
@@ -53,6 +52,9 @@ generate_missing_parents <- function(df) {
 #' @export
 preprocessing <- function(df) {
 
+    # filter extra columns
+    df = subset(df, select = items_in_a_not_b(colnames(df), '...1'))
+
     # rename columns
     colnames(df) <- unlist(lapply(colnames(df), dotsep_to_snake_case))
     colnames(df) <- unlist(lapply(colnames(df), title_to_snake_case))
@@ -61,7 +63,6 @@ preprocessing <- function(df) {
     # cleanup
     df <- df[which(!(is.na(df[, 'mouse_id']) | is.na(df[, 'strain']))), ]  # drop missing mice
     df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
-
 
     # impute missing columns
     if (!('alive' %in% colnames(df))){
@@ -72,14 +73,17 @@ preprocessing <- function(df) {
         }
     }
     if (!('pcr_confirmation' %in% colnames(df))){
-        df[['pcr_confirmation']] = NA
+        if ('chr_m' %in% colnames(df)){
+            df[['pcr_confirmation']] = df[['chr_m']]
+        } else {
+            df[['pcr_confirmation']] = NA
+        }
     }
     for (chr in c('chr_m', 'chr_p')) {
         if (!(chr %in% colnames(df))){
             df[[chr]] = df[['pcr_confirmation']]
         }
     }
-
 
     # impute missing parents
     missing_parents <- generate_missing_parents(df)
@@ -112,22 +116,5 @@ preprocessing <- function(df) {
         df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
     }
 
-    return(df)
-}
-
-
-#' convenience function
-#' 
-#' @export
-read_excel_or_csv <- function(filepath, ext) {
-    if (ext == 'xlsx') {
-        df <- read_excel(filepath)
-        df = subset(df, select = items_in_a_not_b(colnames(df), '...1'))
-    } else if (ext == 'csv') {
-        df <- read.csv(filepath, header=TRUE)
-    } else {
-        log_print(paste(Sys.time(), 'Please enter a xlsx or csv file.'))
-        stop()
-    }
     return(df)
 }

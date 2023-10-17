@@ -4,6 +4,7 @@ source(file.path(
 ) 
 
 ## Functions
+## read_excel_or_csv
 ## rename_columns
 ## rev_df
 ## fillna
@@ -11,6 +12,23 @@ source(file.path(
 ## reset_index
 ## filter_dataframe_column_by_list
 ## pivot
+
+
+#' switch case to read excel or csv based on the extension
+#' 
+#' @export
+read_excel_or_csv <- function(filepath) {
+    ext=tools::file_ext(filepath)
+    if (ext == 'xlsx') {
+        df <- read_excel(filepath)
+    } else if (ext == 'csv') {
+        df <- read.csv(filepath, header=TRUE)
+    } else {
+        log_print(paste(Sys.time(), 'Please enter a xlsx or csv file.'))
+        stop()
+    }
+    return(df)
+}
 
 
 #' rename specific dataframe columns
