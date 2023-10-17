@@ -1,17 +1,12 @@
-## Example code to use kinship2
+## Plots a pedigree from Transnetyx output
 ## See: https://cran.r-project.org/web/packages/kinship2/vignettes/pedigree.html
 
 wd = dirname(this.path::here())  # wd = '~/github/R/bran'
 library('kinship2')
-suppressMessages(library('plyr'))
-library('readxl')
-library('RColorBrewer')
 library('optparse')
 library('logr')
-source(file.path(wd, 'R', 'functions', 'list_tools.R'))  # items_in_a_not_b
-source(file.path(wd, 'R', 'functions', 'text_tools.R'))  # dotsep_to_snake_case, title_to_snake_case
-source(file.path(wd, 'R', 'functions', 'df_tools.R'))  # rename_columns
 source(file.path(wd, 'R', 'preprocessing.R'))
+source(file.path(wd_, 'R', 'functions', 'df_tools.R'))  # read_excel_or_csv
 
 
 # ----------------------------------------------------------------------

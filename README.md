@@ -29,6 +29,12 @@ Export data from your favorite strain in Transnetyx:
 Rscript R/plot_family_tree.R -i path/to/My_Mice.xlsx
 ```
 
+Weave your old annotated data with new export from Transnetyx:
+
+```bash
+Rscript R/weave_data.R -o data/family-tree/old_data.csv -n data/family-tree/My_Mice.xlsx
+```
+
 
 ## Copyright
 

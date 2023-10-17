@@ -1,3 +1,11 @@
+wd_ = dirname(this.path::here())
+suppressMessages(library('plyr'))
+library('RColorBrewer')  # brewer.pal
+source(file.path(wd_, 'R', 'functions', 'list_tools.R'))  # items_in_a_not_b
+source(file.path(wd_, 'R', 'functions', 'text_tools.R'))  # dotsep_to_snake_case, title_to_snake_case
+source(file.path(wd_, 'R', 'functions', 'df_tools.R'))  # rename_columns
+
+
 ## Objects
 ## col_to_new_col
 
@@ -17,8 +25,6 @@ col_to_new_col = c(
 
 
 #' impute parents if mising
-#' 
-#' @export
 generate_missing_parents <- function(df) {
 
     gender_for_parent_id = c(
@@ -47,9 +53,7 @@ generate_missing_parents <- function(df) {
 }
 
 
-#' rename columns
-#' 
-#' @export
+#' main preprocessing function
 preprocessing <- function(df) {
 
     # filter extra columns
@@ -102,7 +106,7 @@ preprocessing <- function(df) {
     }
 
     # fix data types
-    for (col in c('mouse_id', 'father_id', 'mother_id')) {
+    for (col in c('mouse_id', 'father_id', 'mother_id', 'cage_id')) {
         df[[col]] <- as.numeric(df[[col]])
     }
 

@@ -1,3 +1,4 @@
+library('readxl')
 source(file.path(
     dirname(dirname(this.path::here())),  # wd
     'R', 'functions', 'list_tools.R')
