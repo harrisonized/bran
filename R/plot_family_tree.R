@@ -11,6 +11,7 @@ library('logr')
 source(file.path(wd, 'R', 'functions', 'list_tools.R'))  # items_in_a_not_b
 source(file.path(wd, 'R', 'functions', 'text_tools.R'))  # dotsep_to_snake_case, title_to_snake_case
 source(file.path(wd, 'R', 'functions', 'df_tools.R'))  # rename_columns
+source(file.path(wd, 'R', 'preprocessing.R'))
 
 
 # ----------------------------------------------------------------------
@@ -57,118 +58,26 @@ log_print(paste('Script started at:', start_time))
 
 
 # ----------------------------------------------------------------------
-# Pre-script functions
-
-# configs
-col_to_new_col = c(
-    'father'='father_id',
-    'mother'='mother_id',
-    'id'='mouse_id',
-    'ped'='strain'
-)
-
-#' impute parents if mising
-generate_missing_parents <- function(df) {
-
-    gender_for_parent_id = c(
-        'father_id'='Male',
-        'mother_id'='Female'
-    )
-
-    result <- NULL
-    for (parent in c('father_id', 'mother_id')) {
-        parents <- get_unique_values(df, parent)
-        missing_parents <- items_in_a_not_b(parents[parents != 0], df[['mouse_id']])
-        if (!identical(missing_parents, integer(0))) {
-            missing_parents_df <- data.frame(
-                use = 'breeding',
-                strain = '1 - B6',
-                sex = gender_for_parent_id[parent],
-                mouse_id = missing_parents,
-                father_id = 0,
-                mother_id = 0,
-                alive = 1
-            )
-            result <- rbind(result, missing_parents_df)
-        }
-    }
-    return(result)
-}
-
-
-# rename columns
-preprocessing <- function(df) {
-
-    # rename columns
-    colnames(df) <- unlist(lapply(colnames(df), dotsep_to_snake_case))
-    colnames(df) <- unlist(lapply(colnames(df), title_to_snake_case))
-    df <- rename_columns(df, col_to_new_col)
-
-    # cleanup
-    df <- df[which(!(is.na(df[, 'mouse_id']) | is.na(df[, 'strain']))), ]  # drop missing mice
-    df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
-
-    # impute missing columns
-    if (!('alive' %in% colnames(df))){
-        if ('dead' %in% colnames(df)) {
-            df[['alive']] = 1-df[['dead']]
-        } else {
-            df[['alive']] = 1
-        }
-    }
-    if (!('pcr_confirmation' %in% colnames(df))){
-        df[['pcr_confirmation']] = NA
-    }
-
-    # impute missing parents
-    missing_parents <- generate_missing_parents(df)
-    if (!is.null(missing_parents)) {
-        df <- plyr::rbind.fill(df, missing_parents)
-    }
-
-    # impute missing values
-    # NOTE: inplace does not work within functions
-    df <- fillna(df, c('father_id', 'mother_id', 'alive'), 1)
-
-    # remove self parents
-    for (col in c('father_id', 'mother_id')) {
-        df[df[['mouse_id']]==df[[col]], c('father_id', 'mother_id')] <- 0
-    }
-
-    # fix data types
-    for (col in c('mouse_id', 'father_id', 'mother_id')) {
-        df[[col]] <- as.numeric(df[[col]])
-    }
-    
-    return(df)
-}
-
-
-# ----------------------------------------------------------------------
 # Read Data
 
-ext = tools::file_ext(opt[['input-file']])
-if (ext == 'xlsx') {
-    df <- read_excel(file.path(wd, opt[['input-file']]))
-    df = subset(df, select = items_in_a_not_b(colnames(df), '...1'))
-} else if (ext == 'csv') {
-    df <- read.csv(file.path(wd, opt[['input-file']]), header=TRUE)
-} else {
-    log_print(paste(Sys.time(), 'Please enter a xlsx or csv file.'))
-    stop()
-}
 
+df = read_excel_or_csv(
+    filepath=file.path(wd, opt[['input-file']]),
+    ext=tools::file_ext(opt[['input-file']])
+)
 if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     rename_columns(df, c("avail"="dead"), inplace=TRUE)
 }
 df <- preprocessing(df)
 df <- df[order(df[, 'strain'], df[, 'mouse_id']), ]
 
+
 # autoassign colors
 strains <- unique(df[['strain']])
 strains_to_color = brewer.pal(n = length(strains), name = "Set1")
 names(strains_to_color) = sort(strains)
 df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
+
 
 # save
 if (!troubleshooting) {
@@ -195,6 +104,8 @@ tree <- pedigree(
     famid = rep(1, nrow(df))
 )[1]
 
+
+# set names
 if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     names = df[['mouse_id']]
 } else {
@@ -207,6 +118,7 @@ if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     )
 }
 
+# construct affected matrix
 if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     affected <- df[["affected"]]
 } else {
