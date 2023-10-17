@@ -88,6 +88,9 @@ preprocessing <- function(df) {
             df[[chr]] = df[['pcr_confirmation']]
         }
     }
+    if (!('ignore' %in% colnames(df))) {
+        df[['ignore']] = 0
+    }
 
     # impute missing parents
     missing_parents <- generate_missing_parents(df)
@@ -97,7 +100,7 @@ preprocessing <- function(df) {
 
     # impute missing values
     # NOTE: inplace does not work within functions
-    df <- fillna(df, c('father_id', 'mother_id'), 0)
+    df <- fillna(df, c('father_id', 'mother_id', 'ignore'), 0)
     df <- fillna(df, c('alive'), 1)
 
     # remove self parents

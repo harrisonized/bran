@@ -83,6 +83,8 @@ if (!troubleshooting) {
 # ----------------------------------------------------------------------
 # Create Pedigree
 
+df <- df[!(df['ignore']==1), ]  # filter ignored
+
 tree <- pedigree(
     id = df[['mouse_id']],
     dadid = df[['father_id']],
