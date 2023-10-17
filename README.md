@@ -15,6 +15,20 @@ install.packages("RColorBrewer")
 install.packages("optparse")
 ```
 
+## Getting Started
+
+Test on sample\_ped\_tab.csv:
+
+```bash
+Rscript R/plot_family_tree.R -i data/family-tree/sample_ped_tab.csv -p 1
+```
+
+Export data from your favorite strain in Transnetyx:
+
+```bash
+Rscript R/plot_family_tree.R -i path/to/My_Mice.xlsx
+```
+
 
 ## Copyright
 

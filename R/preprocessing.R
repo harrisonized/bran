@@ -12,7 +12,8 @@ col_to_new_col = c(
     'father'='father_id',
     'mother'='mother_id',
     'id'='mouse_id',
-    'ped'='strain'
+    'ped'='strain',
+    'affected'='pcr_confirmation'
 )
 
 
@@ -61,6 +62,7 @@ preprocessing <- function(df) {
     df <- df[which(!(is.na(df[, 'mouse_id']) | is.na(df[, 'strain']))), ]  # drop missing mice
     df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
 
+
     # impute missing columns
     if (!('alive' %in% colnames(df))){
         if ('dead' %in% colnames(df)) {
@@ -72,6 +74,12 @@ preprocessing <- function(df) {
     if (!('pcr_confirmation' %in% colnames(df))){
         df[['pcr_confirmation']] = NA
     }
+    for (chr in c('chr_m', 'chr_p')) {
+        if (!(chr %in% colnames(df))){
+            df[[chr]] = df[['pcr_confirmation']]
+        }
+    }
+
 
     # impute missing parents
     missing_parents <- generate_missing_parents(df)
@@ -81,7 +89,8 @@ preprocessing <- function(df) {
 
     # impute missing values
     # NOTE: inplace does not work within functions
-    df <- fillna(df, c('father_id', 'mother_id', 'alive'), 1)
+    df <- fillna(df, c('father_id', 'mother_id'), 0)
+    df <- fillna(df, c('alive'), 1)
 
     # remove self parents
     for (col in c('father_id', 'mother_id')) {
@@ -92,7 +101,17 @@ preprocessing <- function(df) {
     for (col in c('mouse_id', 'father_id', 'mother_id')) {
         df[[col]] <- as.numeric(df[[col]])
     }
+
+    df <- df[order(df[, 'strain'], df[, 'mouse_id']), ]
     
+    # autoassign colors
+    if (!('color' %in% colnames(df))){
+        strains <- unique(df[['strain']])
+        strains_to_color = brewer.pal(n = length(strains), name = "Set1")
+        names(strains_to_color) = sort(strains)
+        df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
+    }
+
     return(df)
 }
 

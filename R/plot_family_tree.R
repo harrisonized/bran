@@ -39,6 +39,10 @@ option_list = list(
                 metavar="3000", type="integer",
                 help="height in px, -h is protected, -l for length"),
 
+    make_option(c("-p", "--ploidy"), default=2,
+                metavar="2", type="integer",
+                help="ploidy: 1 = homozygous, 2 = heterozygous"),
+
     make_option(c("-t", "--troubleshooting"), default=FALSE, action="store_true",
                 metavar="FALSE", type="logical",
                 help="enable if troubleshooting to prevent overwriting your files")
@@ -60,7 +64,6 @@ log_print(paste('Script started at:', start_time))
 # ----------------------------------------------------------------------
 # Read Data
 
-
 df = read_excel_or_csv(
     filepath=file.path(wd, opt[['input-file']]),
     ext=tools::file_ext(opt[['input-file']])
@@ -69,14 +72,6 @@ if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     rename_columns(df, c("avail"="dead"), inplace=TRUE)
 }
 df <- preprocessing(df)
-df <- df[order(df[, 'strain'], df[, 'mouse_id']), ]
-
-
-# autoassign colors
-strains <- unique(df[['strain']])
-strains_to_color = brewer.pal(n = length(strains), name = "Set1")
-names(strains_to_color) = sort(strains)
-df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
 
 
 # save
@@ -119,9 +114,10 @@ if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
 }
 
 # construct affected matrix
-if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
-    affected <- df[["affected"]]
+if (opt[['ploidy']] == 1) {
+    affected <- df[["pcr_confirmation"]]
 } else {
+    # defaults to 2
     affected <- as.matrix(df[, c('chr_m', 'chr_p')])
 }
 
