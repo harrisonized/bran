@@ -1,5 +1,6 @@
 wd_ = dirname(this.path::here())
 suppressMessages(library('plyr'))
+suppressMessages(library('wrapr'))
 library('RColorBrewer')  # brewer.pal
 source(file.path(wd_, 'R', 'functions', 'list_tools.R'))  # items_in_a_not_b
 source(file.path(wd_, 'R', 'functions', 'text_tools.R'))  # dotsep_to_snake_case, title_to_snake_case
@@ -36,11 +37,12 @@ generate_missing_parents <- function(df) {
     for (parent in c('father_id', 'mother_id')) {
         parents <- get_unique_values(df, parent)
         missing_parents <- items_in_a_not_b(parents[parents != 0], df[['mouse_id']])
-        if (!identical(missing_parents, integer(0))) {
+        if ( !(identical(missing_parents, numeric(0)) |
+               identical(missing_parents, integer(0)) ) ) {
             missing_parents_df <- data.frame(
                 use = 'breeding',
                 strain = '1 - B6',
-                sex = gender_for_parent_id[parent],
+                sex = gender_for_parent_id[[parent]],
                 mouse_id = missing_parents,
                 father_id = 0,
                 mother_id = 0,
@@ -54,7 +56,7 @@ generate_missing_parents <- function(df) {
 
 
 #' main preprocessing function
-preprocessing <- function(df) {
+preprocessing <- function(df, impute_missing_parents=TRUE) {
 
     # filter extra columns
     df = subset(df, select = items_in_a_not_b(colnames(df), '...1'))
@@ -92,10 +94,17 @@ preprocessing <- function(df) {
         df[['ignore']] = 0
     }
 
+    # fix data types
+    for (col in c('mouse_id', 'father_id', 'mother_id', 'cage_id')) {
+        df[[col]] <- as.numeric(df[[col]])
+    }
+
     # impute missing parents
-    missing_parents <- generate_missing_parents(df)
-    if (!is.null(missing_parents)) {
-        df <- plyr::rbind.fill(df, missing_parents)
+    if (impute_missing_parents) {
+        missing_parents <- generate_missing_parents(df)
+        if (!is.null(missing_parents)) {
+            df <- plyr::rbind.fill(df, missing_parents)
+        }
     }
 
     # impute missing values
@@ -107,13 +116,6 @@ preprocessing <- function(df) {
     for (col in c('father_id', 'mother_id')) {
         df[df[['mouse_id']]==df[[col]], c('father_id', 'mother_id')] <- 0
     }
-
-    # fix data types
-    for (col in c('mouse_id', 'father_id', 'mother_id', 'cage_id')) {
-        df[[col]] <- as.numeric(df[[col]])
-    }
-
-    df <- df[order(df[, 'strain'], df[, 'mouse_id']), ]
     
     # autoassign colors
     if (!('color' %in% colnames(df))){
@@ -122,6 +124,9 @@ preprocessing <- function(df) {
         names(strains_to_color) = sort(strains)
         df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
     }
+
+    # see: https://win-vector.com/2021/02/07/it-has-always-been-wrong-to-call-order-on-a-data-frame/
+    df <- df[wrapr::orderv(df[, c('strain', 'mouse_id')]), ]
 
     return(df)
 }

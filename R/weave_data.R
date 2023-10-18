@@ -38,18 +38,27 @@ log_print(paste('Script started at:', start_time))
 
 
 # ----------------------------------------------------------------------
-# Merge Data
+# Main
 
+# read data
+old_df = read_excel_or_csv(file.path(wd, opt[['old-file']]))
+old_df <- preprocessing(old_df)
+new_df = read_excel_or_csv(file.path(wd, opt[['new-file']]))
+new_df <- preprocessing(new_df, impute_missing_parents=FALSE)
+
+# add missing mice
+new_df <- rbind(new_df, dplyr::anti_join(old_df, new_df, by='mouse_id'))  # add missing mice from old to new
+old_df <- rbind(old_df, dplyr::anti_join(new_df, old_df, by='mouse_id'))  # add new mice
+
+# overwrite update_cols using data from new_df
 update_cols = c('age', 'genotype', 'labels', 'cage_id', 'notes', 'rack', 'position')
-
-old = read_excel_or_csv(file.path(wd, opt[['old-file']]))
-old <- preprocessing(old)
-new = read_excel_or_csv(file.path(wd, opt[['new-file']]))
-new <- preprocessing(new)
-
-new_mice = dplyr::anti_join(new, old, by='mouse_id')
-df <- rbind(old, new_mice)
-
+df <- left_join(
+    old_df[, c(items_in_a_not_b(colnames(old_df), update_cols))],
+    new_df[, c('mouse_id', update_cols)],
+    by='mouse_id'
+)
+df <- preprocessing(df)
+df <- df[, colnames(old_df)]  # column order
 
 # save
 if (!troubleshooting) {

@@ -10,6 +10,7 @@ Install the following packages in R:
 ```R
 install.packages('kinship2')
 install.packages('dplyr')
+install.packages('wrapr')
 install.packages("readxl")
 install.packages("RColorBrewer")
 install.packages("optparse")
