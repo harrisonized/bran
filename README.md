@@ -18,23 +18,24 @@ install.packages("optparse")
 
 ## Getting Started
 
-Test on sample\_ped\_tab.csv:
 
-```bash
-Rscript R/plot_family_tree.R -i data/family-tree/sample_ped_tab.csv -p 1
-```
+1. Weave your old annotated data with new export from Transnetyx.
 
-Export data from your favorite strain in Transnetyx:
+	```bash
+	Rscript R/weave_data.R -i data/initial_data.csv -n data/My_Mice.xlsx
+	```
 
-```bash
-Rscript R/plot_family_tree.R -i path/to/My_Mice.xlsx
-```
+2. Generate a pedigree figure. You can either use data directly from Transnetyx or the cleaned output of `weave_data.R`.
+	
+	```bash
+	Rscript R/plot_family_tree.R -i path/to/My_Mice.xlsx
+	```
 
-Weave your old annotated data with new export from Transnetyx:
+3. Test on `sample_ped_tab.csv`. The input file is already the default option of the script.
 
-```bash
-Rscript R/weave_data.R -o data/family-tree/old_data.csv -n data/family-tree/My_Mice.xlsx
-```
+	```bash
+	Rscript R/plot_family_tree.R -i data/sample_ped_tab.csv -p 1
+	```
 
 
 ## Copyright

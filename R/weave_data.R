@@ -14,12 +14,12 @@ source(file.path(wd_, 'R', 'functions', 'df_tools.R'))  # read_excel_or_csv
 
 # args
 option_list = list(
-    make_option(c("-i", "--initial-data"), default='data/family-tree/old_data.csv',
-                metavar='data/family-tree/old_data.csv',
-                type="character",help="template file where you listed your annnotations"),
+    make_option(c("-i", "--initial-data"), default='data/initial_data.csv',
+                metavar='data/initial_data.csv',
+                type="character",help="the data you had before, including past annotations"),
 
-    make_option(c("-n", "--new-data"), default='data/family-tree/My_Mice.xlsx',
-                metavar='data/family-tree/My_Mice.xlsx',
+    make_option(c("-n", "--new-data"), default='data/My_Mice.xlsx',
+                metavar='data/My_Mice.xlsx',
                 type="character",help="new file downloaded directly from transnetyx"),
 
     make_option(c("-t", "--troubleshooting"), default=FALSE, action="store_true",

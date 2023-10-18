@@ -2,7 +2,7 @@
 ## See: https://cran.r-project.org/web/packages/kinship2/vignettes/pedigree.html
 
 wd = dirname(this.path::here())  # wd = '~/github/R/bran'
-library('kinship2')
+suppressMessages(library('kinship2'))
 library('optparse')
 library('logr')
 source(file.path(wd, 'R', 'preprocessing.R'))
@@ -14,12 +14,12 @@ source(file.path(wd_, 'R', 'functions', 'df_tools.R'))  # read_excel_or_csv
 
 # args
 option_list = list(
-    make_option(c("-i", "--input-file"), default='data/family-tree/sample_ped_tab.csv',
-                metavar='data/family-tree/sample_ped_tab.csv',
+    make_option(c("-i", "--input-file"), default='data/sample_ped_tab.csv',
+                metavar='data/sample_ped_tab.csv',
                 type="character",help="path/to/input/file"),
    
-    make_option(c("-o", "--output-dir"), default="figures/family-tree",
-                metavar="figures/family-tree", type="character",
+    make_option(c("-o", "--output-dir"), default="figures",
+                metavar="figures", type="character",
                 help="set the output directory for the data"),
 
     make_option(c("-e", "--use-example"), default=FALSE, action="store_true",
@@ -46,7 +46,7 @@ opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 troubleshooting = opt[['troubleshooting']]
 if (opt[['use-example']]) {
-    opt[['input-file']] = 'data/family-tree/sample_ped_tab.csv'
+    opt[['input-file']] = 'data/sample_ped_tab.csv'
 }
 
 # Start Log
@@ -60,9 +60,6 @@ log_print(paste('Script started at:', start_time))
 # Read Data
 
 df = read_excel_or_csv(file.path(wd, opt[['input-file']]))
-if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
-    rename_columns(df, c("avail"="dead"), inplace=TRUE)
-}
 df <- preprocessing(df)
 
 

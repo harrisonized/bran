@@ -21,6 +21,7 @@ col_to_new_col = c(
     'mother'='mother_id',
     'id'='mouse_id',
     'ped'='strain',
+    "avail"="dead",
     'affected'='pcr_confirmation'
 )
 
@@ -92,6 +93,9 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     }
     if (!('ignore' %in% colnames(df))) {
         df[['ignore']] = 0
+    }
+    if (!('cage_id' %in% colnames(df))) {
+        df[['cage_id']] = NA
     }
 
     # fix data types
