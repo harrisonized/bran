@@ -98,6 +98,13 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
         df[['cage_id']] = NA
     }
 
+    # if multiple parents are listed, eg. "10752; 10753", chooses the first one
+    for (col in c('father_id', 'mother_id')) {
+        df[[col]] <- unlist(
+            lapply(df[[col]], function(x) strsplit(x, "; ")[[1]][1])
+        )
+    }
+
     # fix data types
     for (col in c('mouse_id', 'father_id', 'mother_id', 'cage_id')) {
         df[[col]] <- as.numeric(df[[col]])
