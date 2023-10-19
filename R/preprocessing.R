@@ -100,9 +100,11 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
 
     # if multiple parents are listed, eg. "10752; 10753", chooses the first one
     for (col in c('father_id', 'mother_id')) {
-        df[[col]] <- unlist(
-            lapply(df[[col]], function(x) strsplit(x, "; ")[[1]][1])
-        )
+        if (is.character(df[[col]])) {
+            df[[col]] <- unlist(
+                lapply(df[[col]], function(x) strsplit(x, "; ")[[1]][1])
+            )
+        }
     }
 
     # fix data types

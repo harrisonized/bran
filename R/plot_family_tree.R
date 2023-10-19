@@ -136,6 +136,7 @@ if (!troubleshooting) {
          col = df[['color']],
          symbolsize = 0.8,
          cex = 0.6,
+         branch = 1,
          angle = rep(0, length(df)),
          density = rep(100, length(df))
     )
