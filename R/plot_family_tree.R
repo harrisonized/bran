@@ -38,6 +38,10 @@ option_list = list(
                 metavar="2", type="integer",
                 help="ploidy: 1 = homozygous, 2 = heterozygous"),
 
+    make_option(c("-s", "--show-dead"), default=FALSE, action="store_true",
+                metavar="FALSE", type="logical",
+                help="by default, dead mice are automatically hidden"),
+
     make_option(c("-t", "--troubleshooting"), default=FALSE, action="store_true",
                 metavar="FALSE", type="logical",
                 help="enable if troubleshooting to prevent overwriting your files")
@@ -80,13 +84,18 @@ if (!troubleshooting) {
 # ----------------------------------------------------------------------
 # Create Pedigree
 
-# filter ignored
+
+# ignore certain mice
 parents = get_unique_values(df, c('father_id', 'mother_id'))
-df <- df[
-    !( (df[['ignore']] == 1) &
-      !(df[['mouse_id']] %in% parents)
-    ), 
-]
+if (opt[['show-dead']]) {
+    mask = !(df[['mouse_id']] %in% parents) &
+            (df[['ignore']] == 1)
+} else {
+    mask = !(df[['mouse_id']] %in% parents) &
+            ((df[['ignore']] == 1) | (df[['alive']] == 0))
+}
+df <- df[!mask, ]  # filter
+
 
 tree <- pedigree(
     id = df[['mouse_id']],

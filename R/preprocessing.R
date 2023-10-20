@@ -42,7 +42,7 @@ generate_missing_parents <- function(df) {
                identical(missing_parents, integer(0)) ) ) {
             missing_parents_df <- data.frame(
                 use = 'Breeding',
-                strain = 'Imputed',
+                strain = '0 - Imputed',
                 sex = gender_for_parent_id[[parent]],
                 mouse_id = missing_parents,
                 father_id = 0,
@@ -68,11 +68,14 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     df <- rename_columns(df, col_to_new_col)
 
     # cleanup
-    df <- df[which(!(is.na(df[, 'mouse_id']) | is.na(df[, 'strain']))), ]  # drop missing mice
+    df <- df[which(!is.na(df[, 'mouse_id'])), ]  # drop missing mice
     df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
 
     # impute missing columns
-    if (!('alive' %in% colnames(df))){
+    if ('dod' %in% colnames(df)) {
+        df[['alive']] <- as.integer(is.na(df[['dod']]))
+    }
+    if (!('alive' %in% colnames(df))) {
         if ('dead' %in% colnames(df)) {
             df[['alive']] = 1-df[['dead']]
         } else {
@@ -95,7 +98,10 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
         df[['ignore']] = 0
     }
     if (!('cage_id' %in% colnames(df))) {
-        df[['cage_id']] = NA
+        df[['cage_id']] = 1
+    }
+    if (!('strain' %in% colnames(df))) {
+        df[['strain']] = '0 - Unknown'
     }
 
     # remove first newline
@@ -138,17 +144,18 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     }
    
     # update date instead of relying on Transnetyx
-    df[['age']] <- as.integer(difftime(Sys.Date(), as.Date(df[['dob']], "%m/%d/%y")))
-        
+    if ('age' %in% colnames(df)) {
+        df[['age']] <- as.integer(difftime(Sys.Date(), as.Date(df[['dob']], "%m/%d/%y")))
+    }
+
     # autoassign colors
-    if (!('color' %in% colnames(df))){
-        strains <- unique(df[['strain']])
+    if (!('color' %in% colnames(df))) {
+        strains <- sort(unique(df[['strain']]))
         strains_to_color = brewer.pal(n = length(strains), name = "Set1")
         names(strains_to_color) = sort(strains)
         df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
-    } else {
-        df <- fillna(df, c('color'), '#7F7F7F')  # gray
     }
+    df <- fillna(df, c('color'), '#7F7F7F')  # gray
 
     # see: https://win-vector.com/2021/02/07/it-has-always-been-wrong-to-call-order-on-a-data-frame/
     df <- df[wrapr::orderv(df[, c('strain', 'mouse_id')]), ]
