@@ -27,7 +27,7 @@ col_to_new_col = c(
 
 
 #' impute parents if mising
-generate_missing_parents <- function(df, strain_name='imputed') {
+generate_missing_parents <- function(df) {
 
     gender_for_parent_id = c(
         'father_id'='Male',
@@ -42,7 +42,7 @@ generate_missing_parents <- function(df, strain_name='imputed') {
                identical(missing_parents, integer(0)) ) ) {
             missing_parents_df <- data.frame(
                 use = 'Breeding',
-                strain = strain_name,
+                strain = 'Imputed',
                 sex = gender_for_parent_id[[parent]],
                 mouse_id = missing_parents,
                 father_id = 0,
@@ -98,6 +98,13 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
         df[['cage_id']] = NA
     }
 
+    # remove first newline
+    if ('notes' %in% colnames(df)) {
+        df[['notes']] <- unlist(
+            lapply(df[['notes']], function(x) sub("\r\n*|\n*|\r*", "", x))
+        )  
+    }
+
     # if multiple parents are listed, eg. "10752; 10753", chooses the first one
     for (col in c('father_id', 'mother_id')) {
         if (is.character(df[[col]])) {
@@ -108,7 +115,7 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     }
 
     # fix data types
-    for (col in c('mouse_id', 'father_id', 'mother_id', 'cage_id')) {
+    for (col in c('mouse_id', 'father_id', 'mother_id')) {
         df[[col]] <- as.numeric(df[[col]])
     }
 
@@ -140,7 +147,7 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
         names(strains_to_color) = sort(strains)
         df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
     } else {
-        df <- fillna(df, c('color'), '#7f7f7f')  # gray
+        df <- fillna(df, c('color'), '#7F7F7F')  # gray
     }
 
     # see: https://win-vector.com/2021/02/07/it-has-always-been-wrong-to-call-order-on-a-data-frame/
