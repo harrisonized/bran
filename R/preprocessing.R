@@ -27,7 +27,7 @@ col_to_new_col = c(
 
 
 #' impute parents if mising
-generate_missing_parents <- function(df) {
+generate_missing_parents <- function(df, strain_name='imputed') {
 
     gender_for_parent_id = c(
         'father_id'='Male',
@@ -41,8 +41,8 @@ generate_missing_parents <- function(df) {
         if ( !(identical(missing_parents, numeric(0)) |
                identical(missing_parents, integer(0)) ) ) {
             missing_parents_df <- data.frame(
-                use = 'breeding',
-                strain = '1 - B6',
+                use = 'Breeding',
+                strain = strain_name,
                 sex = gender_for_parent_id[[parent]],
                 mouse_id = missing_parents,
                 father_id = 0,
@@ -129,13 +129,18 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     for (col in c('father_id', 'mother_id')) {
         df[df[['mouse_id']]==df[[col]], c('father_id', 'mother_id')] <- 0
     }
-    
+   
+    # update date instead of relying on Transnetyx
+    df[['age']] <- as.integer(difftime(Sys.Date(), as.Date(df[['dob']], "%m/%d/%y")))
+        
     # autoassign colors
     if (!('color' %in% colnames(df))){
         strains <- unique(df[['strain']])
         strains_to_color = brewer.pal(n = length(strains), name = "Set1")
         names(strains_to_color) = sort(strains)
         df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
+    } else {
+        df <- fillna(df, c('color'), '#7f7f7f')  # gray
     }
 
     # see: https://win-vector.com/2021/02/07/it-has-always-been-wrong-to-call-order-on-a-data-frame/

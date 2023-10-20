@@ -60,8 +60,6 @@ df <- left_join(
 df <- preprocessing(df)
 df <- df[, colnames(old_data)]  # reorder columns
 
-# update date instead of relying on Transnetyx
-df[['age']] <- as.integer(difftime(Sys.Date(), as.Date(df[['dob']], "%m/%d/%y")))
 
 # save
 if (!troubleshooting) {

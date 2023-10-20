@@ -1,5 +1,7 @@
 ## Functions
 ## dotsep_to_snake_case
+## title_to_snake_case
+
 
 #' Converts "Column.Title" to column_title
 #'

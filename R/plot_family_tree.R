@@ -80,7 +80,13 @@ if (!troubleshooting) {
 # ----------------------------------------------------------------------
 # Create Pedigree
 
-df <- df[!(df['ignore']==1), ]  # filter ignored
+# filter ignored
+parents = get_unique_values(df, c('father_id', 'mother_id'))
+df <- df[
+    !( (df[['ignore']] == 1) &
+      !(df[['mouse_id']] %in% parents)
+    ), 
+]
 
 tree <- pedigree(
     id = df[['mouse_id']],
