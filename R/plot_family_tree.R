@@ -22,21 +22,25 @@ option_list = list(
                 metavar="figures", type="character",
                 help="set the output directory for the data"),
 
-    make_option(c("-e", "--use-example"), default=FALSE, action="store_true",
-                metavar="FALSE", type="logical",
-                help="use example file instead of real file"),
-
-    make_option(c("-w", "--width"), default=5000,
-                metavar="5000", type="integer",
-                help="width in px"),
-
     make_option(c("-l", "--height"), default=3000,
                 metavar="3000", type="integer",
                 help="height in px, -h is protected, -l for length"),
 
+    make_option(c("-w", "--width"), default=5000,
+                metavar="5000", type="integer",
+                help="width in px, max width is 200000"),
+
+    make_option(c("-c", "--cex"), default=0.6,
+                metavar="0.6", type="numeric",
+                help="can reduce this if text is overlapping"),
+
     make_option(c("-p", "--ploidy"), default=2,
                 metavar="2", type="integer",
                 help="ploidy: 1 = homozygous, 2 = heterozygous"),
+
+    make_option(c("-j", "--jpg"), default=FALSE, action="store_true",
+                metavar="FALSE", type="logical",
+                help="use jpg instead of png"),  # note: the jpg is larger than the png
 
     make_option(c("-s", "--show-dead"), default=FALSE, action="store_true",
                 metavar="FALSE", type="logical",
@@ -49,8 +53,8 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 troubleshooting = opt[['troubleshooting']]
-if (opt[['use-example']]) {
-    opt[['input-file']] = 'data/sample_ped_tab.csv'
+if (opt[['width']] > 200000) {
+    opt[['width']] = 200000
 }
 
 # Start Log
@@ -133,12 +137,21 @@ if (!troubleshooting) {
     if (!dir.exists(directory)) {
         dir.create(directory, recursive=TRUE)
     }
+
+    # switch
+    if (opt[['jpg']]) {
+        ext = '.jpg'
+        img <- jpeg
+    } else {
+        ext = '.png'
+        img <- png
+    }
     filepath = file.path(
         directory,  # dir
-        paste0(tools::file_path_sans_ext(basename(opt[['input-file']])), '.png')  # filename
+        paste0(tools::file_path_sans_ext(basename(opt[['input-file']])), ext)  # filename
     )
 
-    png(filepath,
+    img(filepath,
         width = opt[['width']], height = opt[['height']],
         units = "px", bg = "white",
         res = 1200, pointsize = 5
@@ -150,7 +163,7 @@ if (!troubleshooting) {
          status = 1-df[['alive']],
          col = df[['color']],
          symbolsize = 0.8,
-         cex = 0.6,
+         cex = opt[['cex']],
          branch = 1,
          angle = rep(0, length(df)),
          density = rep(100, length(df))
