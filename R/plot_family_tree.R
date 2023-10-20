@@ -42,9 +42,13 @@ option_list = list(
                 metavar="FALSE", type="logical",
                 help="use jpg instead of png"),  # note: the jpg is larger than the png
 
-    make_option(c("-s", "--show-dead"), default=FALSE, action="store_true",
+    make_option(c("-d", "--show-dead"), default=FALSE, action="store_true",
                 metavar="FALSE", type="logical",
                 help="by default, dead mice are automatically hidden"),
+
+    make_option(c("-s", "--show-ignored"), default=FALSE, action="store_true",
+                metavar="FALSE", type="logical",
+                help="unhides all the manually-ignored mice"),
 
     make_option(c("-t", "--troubleshooting"), default=FALSE, action="store_true",
                 metavar="FALSE", type="logical",
@@ -91,6 +95,9 @@ if (!troubleshooting) {
 
 # ignore certain mice
 parents = get_unique_values(df, c('father_id', 'mother_id'))
+if (opt[['show-ignored']]) {
+    df[['ignore']] = 0
+}
 if (opt[['show-dead']]) {
     mask = !(df[['mouse_id']] %in% parents) &
             (df[['ignore']] == 1)

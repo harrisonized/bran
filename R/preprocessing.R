@@ -75,7 +75,13 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
 
     # impute missing columns
     if ('dod' %in% colnames(df)) {
-        df[['alive']] <- as.integer(is.na(df[['dod']]))
+        if ('alive' %in% colnames(df)) {
+            df[(df['alive']==1), 'alive'] <- as.integer(is.na(df[(df['alive']==1), 'dod']))
+        } else {
+            df[['alive']] <- as.integer(is.na(df[['dod']]))
+        }
+    } else {
+        df[['dod']] = NA
     }
     if (!('alive' %in% colnames(df))) {
         if ('dead' %in% colnames(df)) {
