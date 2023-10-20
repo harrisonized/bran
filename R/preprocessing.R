@@ -67,7 +67,9 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     colnames(df) <- unlist(lapply(colnames(df), title_to_snake_case))
     df <- rename_columns(df, col_to_new_col)
 
-    # cleanup
+    # cleanup mouse ids
+    df <- df[!grepl('Count: ', df[['mouse_id']]), ]  # drop filler rows
+    df[['mouse_id']] <- as.numeric(df[['mouse_id']])
     df <- df[which(!is.na(df[, 'mouse_id'])), ]  # drop missing mice
     df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
 
@@ -121,7 +123,7 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     }
 
     # fix data types
-    for (col in c('mouse_id', 'father_id', 'mother_id')) {
+    for (col in c('father_id', 'mother_id')) {
         df[[col]] <- as.numeric(df[[col]])
     }
 
@@ -151,8 +153,11 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     # autoassign colors
     if (!('color' %in% colnames(df))) {
         strains <- sort(unique(df[['strain']]))
-        strains_to_color = brewer.pal(n = length(strains), name = "Set1")
-        names(strains_to_color) = sort(strains)
+        n_strains = length(strains)
+        strains_to_color = colorRampPalette(
+            brewer.pal(n = min(n_strains, 9), name = "Set1")
+        )(n_strains)
+        names(strains_to_color) = strains
         df[['color']] = unlist(lapply(df[['strain']], function(x) strains_to_color[[x]]))
     }
     df <- fillna(df, c('color'), '#7F7F7F')  # gray
