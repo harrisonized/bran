@@ -46,7 +46,7 @@ option_list = list(
                 metavar="FALSE", type="logical",
                 help="by default, dead mice are automatically hidden"),
 
-    make_option(c("-s", "--show-ignored"), default=FALSE, action="store_true",
+    make_option(c("-a", "--show-all"), default=FALSE, action="store_true",
                 metavar="FALSE", type="logical",
                 help="unhides all the manually-ignored mice"),
 
@@ -95,7 +95,7 @@ if (!troubleshooting) {
 
 # ignore certain mice
 parents = get_unique_values(df, c('father_id', 'mother_id'))
-if (opt[['show-ignored']]) {
+if (opt[['show-all']]) {
     df[['ignore']] = 0
 }
 if (opt[['show-dead']]) {
@@ -122,9 +122,10 @@ if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     names = df[['mouse_id']]
 } else {
     rack_names = gsub(".* ([0-9]+[Aa|Bb]).*", "\\1", df[['rack']])  # regex match Rack 1A
+    positions = ifelse((df[['position']]=='Unassigned'), NA, df[['position']])
     names = paste0(
         df[['mouse_id']], '\n',
-        rack_names, ', ', df[['position']], '\n',
+        rack_names, ', ', positions, '\n',
         df[['dob']], '\n',
         df[['age']], 'd'
     )
