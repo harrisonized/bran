@@ -152,8 +152,16 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     }
    
     # update date instead of relying on Transnetyx
-    if ('age' %in% colnames(df)) {
-        df[['age']] <- as.integer(difftime(Sys.Date(), as.Date(df[['dob']], "%m/%d/%y")))
+    if ('age' %in% colnames(df) & 'dob' %in% colnames(df)) {
+        if ('dod' %in% colnames(df)) {
+            df[['age']] <- ifelse(
+                !is.na(df[['dod']]),
+                difftime(as.Date(df[['dod']], "%m/%d/%y"), as.Date(df[['dob']], "%m/%d/%y")),
+                difftime(Sys.Date(), as.Date(df[['dob']], "%m/%d/%y"))
+            )
+        } else {
+            df[['age']] <- as.integer(difftime(Sys.Date(), as.Date(df[['dob']], "%m/%d/%y")))
+        }
     }
 
     # autoassign colors
