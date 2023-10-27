@@ -45,18 +45,20 @@ old_data = read_excel_or_csv(file.path(wd, opt[['initial-data']]))
 old_data <- preprocessing(old_data)
 new_data = read_excel_or_csv(file.path(wd, opt[['new-data']]))
 new_data <- preprocessing(new_data, impute_missing_parents=FALSE)
+missing_mice <- dplyr::anti_join(old_data, new_data, by='mouse_id')
+new_mice <- dplyr::anti_join(new_data, old_data, by='mouse_id')
 
-# add missing mice
-new_data <- rbind(new_data, dplyr::anti_join(old_data, new_data, by='mouse_id'))  # add missing mice from old to new
-old_data <- rbind(old_data, dplyr::anti_join(new_data, old_data, by='mouse_id'))  # add new mice
-
-# overwrite update_cols using data from new_data
 update_cols = c('age', 'genotype', 'labels', 'cage_id', 'notes', 'rack', 'position')
-df <- left_join(
+
+# merge, overwrite update_cols using new_data
+new_data <- rbind(new_data, missing_mice)  # add missing_mice to new_data
+old_data <- rbind(old_data, new_mice)  # add new_mice to old_data
+df <- merge(
     old_data[, c(items_in_a_not_b(colnames(old_data), update_cols))],
     new_data[, c('mouse_id', update_cols)],
     by='mouse_id'
 )
+
 df <- preprocessing(df)
 df <- df[, colnames(old_data)]  # reorder columns
 
@@ -68,12 +70,20 @@ if (!troubleshooting) {
         dir.create(directory, recursive=TRUE)
     }
 
-    # merged file
     filepath = file.path(
         directory,
         paste0('_', tools::file_path_sans_ext(basename(opt[['initial-data']])), '.csv')  # filename
     )
+
+    # merged file
     write.table(df, file = filepath, row.names = FALSE, sep = ',' )
+
+    # missing mice
+    write.table(
+        missing_mice,
+        file = file.path(paste0(tools::file_path_sans_ext(filepath), '-missing', '.csv')),
+        row.names = FALSE, sep = ','
+    )
 }
 
 
