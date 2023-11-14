@@ -156,11 +156,20 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
         if ('dod' %in% colnames(df)) {
             df[['age']] <- ifelse(
                 !is.na(df[['dod']]),
-                difftime(as.Date(df[['dod']], "%m/%d/%y"), as.Date(df[['dob']], "%m/%d/%y")),
-                difftime(Sys.Date(), as.Date(df[['dob']], "%m/%d/%y"))
+                as.integer(difftime(
+                    as.Date(df[['dod']], "%m/%d/%Y"),
+                    as.Date(df[['dob']], "%m/%d/%Y"), units ="days")
+                ),
+                as.integer(difftime(
+                    Sys.Date(), 
+                    as.Date(df[['dob']], "%m/%d/%Y"), units ="days")
+                )
             )
         } else {
-            df[['age']] <- as.integer(difftime(Sys.Date(), as.Date(df[['dob']], "%m/%d/%y")))
+            df[['age']] <- as.integer(difftime(
+                Sys.Date(),
+                as.Date(df[['dob']], "%m/%d/%Y"), units ="days")
+            )
         }
     }
 

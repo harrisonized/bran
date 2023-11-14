@@ -126,7 +126,7 @@ if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
     names = paste0(
         df[['mouse_id']], '\n',
         rack_names, ', ', positions, '\n',
-        df[['dob']], '\n',
+        strftime(as.Date(df[['dob']], "%m/%d/%Y"), "%m/%d/%y"), '\n',
         df[['age']], 'd'
     )
 }
