@@ -11,6 +11,7 @@ source(file.path(wd_, 'R', 'functions', 'df_tools.R'))  # rename_columns
 ## col_to_new_col
 
 ## Functions
+## standardize_dates
 ## generate_missing_parents
 ## preprocessing
 
@@ -24,6 +25,16 @@ col_to_new_col = c(
     "avail"="dead",
     'affected'='pcr_confirmation'
 )
+
+
+#' @export
+standardize_dates <- function(date) {
+    if ( grepl('^([0-9]+)/([0-9]+)/([0-9]{2})$', date) ) {
+        return(format(as.Date(date, format = "%m/%d/%y"), "%m/%d/%Y"))
+    } else {
+        return(date)
+    }
+}
 
 
 #' impute parents if mising
@@ -172,6 +183,9 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
             )
         }
     }
+
+    df[['dob']] <- sapply(df[['dob']], standardize_dates)
+    df[['dod']] <- sapply(df[['dod']], standardize_dates)
 
     # autoassign colors
     if (!('color' %in% colnames(df))) {
