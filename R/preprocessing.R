@@ -162,6 +162,9 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
         df[df[['mouse_id']]==df[[col]], c('father_id', 'mother_id')] <- 0
     }
    
+    df[['dob']] <- sapply(df[['dob']], standardize_dates)
+    df[['dod']] <- sapply(df[['dod']], standardize_dates)
+
     # update date instead of relying on Transnetyx
     if ('age' %in% colnames(df) & 'dob' %in% colnames(df)) {
         if ('dod' %in% colnames(df)) {
@@ -183,9 +186,6 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
             )
         }
     }
-
-    df[['dob']] <- sapply(df[['dob']], standardize_dates)
-    df[['dod']] <- sapply(df[['dod']], standardize_dates)
 
     # autoassign colors
     if (!('color' %in% colnames(df))) {
