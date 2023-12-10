@@ -1,31 +1,10 @@
-library('readxl')
-source(file.path(
-    dirname(dirname(this.path::here())),  # wd
-    'R', 'functions', 'list_tools.R')
-) 
+import::here(file.path(wd, 'R', 'utils', 'list_tools.R'),
+    'replace_specific_items', .character_only=TRUE)
 
 ## Functions
-## read_excel_or_csv
 ## rename_columns
 ## fillna
 ## get_unique_values
-
-
-#' switch case to read excel or csv based on the extension
-#' 
-#' @export
-read_excel_or_csv <- function(filepath) {
-    ext=tools::file_ext(filepath)
-    if (ext == 'xlsx') {
-        df <- read_excel(filepath)
-    } else if (ext == 'csv') {
-        df <- read.csv(filepath, header=TRUE)
-    } else {
-        log_print(paste(Sys.time(), 'Please enter a xlsx or csv file.'))
-        stop()
-    }
-    return(df)
-}
 
 
 #' rename specific dataframe columns

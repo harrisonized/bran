@@ -2,11 +2,15 @@
 ## Automatically outputs to the troubleshooting folder
 
 wd = dirname(this.path::here())  # wd = '~/github/R/bran'
-suppressMessages(library('dplyr'))
+suppressPackageStartupMessages(library('dplyr'))
 library('optparse')
 library('logr')
-source(file.path(wd, 'R', 'preprocessing.R'))
-source(file.path(wd_, 'R', 'functions', 'df_tools.R'))  # read_excel_or_csv
+import::here(file.path(wd, 'R', 'utils', 'file_io.R'),
+    'read_excel_or_csv', .character_only=TRUE)
+import::here(file.path(wd, 'R', 'utils', 'list_tools.R'),
+    'items_in_a_not_b', .character_only=TRUE)
+import::here(file.path(wd, 'R', 'functions', 'preprocessing.R'),
+    'generate_missing_parents', 'preprocessing', .character_only=TRUE)
 
 
 # ----------------------------------------------------------------------

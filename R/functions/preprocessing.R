@@ -1,11 +1,12 @@
 wd_ = dirname(this.path::here())
-suppressMessages(library('plyr'))
-suppressMessages(library('wrapr'))
-library('RColorBrewer')  # brewer.pal
-source(file.path(wd_, 'R', 'functions', 'list_tools.R'))  # items_in_a_not_b
-source(file.path(wd_, 'R', 'functions', 'text_tools.R'))  # dotsep_to_snake_case, title_to_snake_case
-source(file.path(wd_, 'R', 'functions', 'df_tools.R'))  # rename_columns
-
+import::here(wrapr, 'orderv')
+import::here(RColorBrewer, 'brewer.pal')
+import::here(file.path(wd, 'R', 'utils', 'list_tools.R'),
+    'items_in_a_not_b', .character_only=TRUE)
+import::here(file.path(wd, 'R', 'utils', 'text_tools.R'),
+    'dotsep_to_snake_case', 'title_to_snake_case', .character_only=TRUE)
+import::here(file.path(wd, 'R', 'utils', 'df_tools.R'),
+    'rename_columns', 'fillna', 'get_unique_values', .character_only=TRUE)
 
 ## Objects
 ## col_to_new_col

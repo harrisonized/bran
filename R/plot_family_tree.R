@@ -2,12 +2,15 @@
 ## See: https://cran.r-project.org/web/packages/kinship2/vignettes/pedigree.html
 
 wd = dirname(this.path::here())  # wd = '~/github/R/bran'
-suppressMessages(library('kinship2'))
 library('optparse')
 library('logr')
-source(file.path(wd, 'R', 'preprocessing.R'))
-source(file.path(wd_, 'R', 'functions', 'df_tools.R'))  # read_excel_or_csv
-
+import::from(kinship2,'pedigree')
+import::from(file.path(wd, 'R', 'functions', 'preprocessing.R'),
+    'preprocessing', .character_only=TRUE)
+import::from(file.path(wd, 'R', 'utils', 'file_io.R'),
+    'read_excel_or_csv', .character_only=TRUE)
+import::from(file.path(wd, 'R', 'utils', 'df_tools.R'),
+    'get_unique_values', 'fillna', .character_only=TRUE)
 
 # ----------------------------------------------------------------------
 # Pre-script settings
