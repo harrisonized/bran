@@ -1,11 +1,11 @@
-wd_ = dirname(this.path::here())
 import::here(wrapr, 'orderv')
+import::here(plyr, 'rbind.fill')
 import::here(RColorBrewer, 'brewer.pal')
-import::here(file.path(wd, 'R', 'utils', 'list_tools.R'),
+import::here(file.path(wd, 'R', 'tools', 'list_tools.R'),
     'items_in_a_not_b', .character_only=TRUE)
-import::here(file.path(wd, 'R', 'utils', 'text_tools.R'),
+import::here(file.path(wd, 'R', 'tools', 'text_tools.R'),
     'dotsep_to_snake_case', 'title_to_snake_case', .character_only=TRUE)
-import::here(file.path(wd, 'R', 'utils', 'df_tools.R'),
+import::here(file.path(wd, 'R', 'tools', 'df_tools.R'),
     'rename_columns', 'fillna', 'get_unique_values', .character_only=TRUE)
 
 ## Objects
@@ -18,6 +18,7 @@ import::here(file.path(wd, 'R', 'utils', 'df_tools.R'),
 
 
 #' used to match data from sample_ped_tab.csv to transnetyx output
+#' 
 col_to_new_col = c(
     'father'='father_id',
     'mother'='mother_id',
@@ -28,7 +29,11 @@ col_to_new_col = c(
 )
 
 
-#' @export
+#' Standardize dates
+#'
+#' @description
+#' Dates in MM/DD/YY format are converted to MM/DD/YYYY
+#' 
 standardize_dates <- function(date) {
     if ( grepl('^([0-9]+)/([0-9]+)/([0-9]{2})$', date) ) {
         return(format(as.Date(date, format = "%m/%d/%y"), "%m/%d/%Y"))
@@ -38,7 +43,11 @@ standardize_dates <- function(date) {
 }
 
 
-#' impute parents if mising
+#' Impute parents if mising
+#'
+#' @description
+#' If the parent is missing, creates a new F0 mouse of strain='0 - Imputed' and assigns an id of 0 for its parents.
+#' 
 generate_missing_parents <- function(df) {
 
     gender_for_parent_id = c(
@@ -68,7 +77,21 @@ generate_missing_parents <- function(df) {
 }
 
 
-#' main preprocessing function
+#' Main preprocessing function
+#'
+#' @description
+#' Does the following:
+#'   1. rename columns, clean up mouse_ids, notes
+#'   2. impute missing columns: dob, dod, alive, pcr_confirmation, chr_m, chr_p, ignore, cage_id, strain;
+#'   3. fix parents: picks first parent or imputes missing parents;
+#'   4. standardize dates;
+#'   5. assign colors
+#' 
+#' @param df a dataframe
+#' @param impute_missing_parents TRUE/FALSE. Required if parents are missing.
+#' Without it, [kinship2::pedigree()] will throw the following error:
+#' Value of 'dadid' (or 'momid') not found in the id list.
+#' 
 preprocessing <- function(df, impute_missing_parents=TRUE) {
 
     # filter extra columns
@@ -82,10 +105,22 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     # cleanup mouse ids
     df <- df[!grepl('Count: ', df[['mouse_id']]), ]  # drop filler rows
     df[['mouse_id']] <- as.numeric(df[['mouse_id']])
-    df <- df[which(!is.na(df[, 'mouse_id'])), ]  # drop missing mice
+    df <- df[which(!is.na(df[, 'mouse_id'])), ]  # drop mice with missing IDs
     df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
 
-    # impute missing columns
+    # clean up notes field, remove first newline
+    if ('notes' %in% colnames(df)) {
+        df[['notes']] <- unlist(
+            lapply(df[['notes']], function(x) sub("\r\n*|\n*|\r*", "", x))
+        )  
+    }
+
+    # ----------------------------------------------------------------------
+    # Impute missing columns
+
+    if (!('dob' %in% colnames(df))) {
+        df[['dob']] = NA
+    }
     if ('dod' %in% colnames(df)) {
         if ('alive' %in% colnames(df)) {
             df[(df['alive']==1), 'alive'] <- as.integer(is.na(df[(df['alive']==1), 'dod']))
@@ -124,12 +159,8 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
         df[['strain']] = '0 - Unknown'
     }
 
-    # remove first newline
-    if ('notes' %in% colnames(df)) {
-        df[['notes']] <- unlist(
-            lapply(df[['notes']], function(x) sub("\r\n*|\n*|\r*", "", x))
-        )  
-    }
+    # ----------------------------------------------------------------------
+    # Fix parents
 
     # if multiple parents are listed, eg. "10752; 10753", chooses the first one
     for (col in c('father_id', 'mother_id')) {
@@ -162,7 +193,10 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
     for (col in c('father_id', 'mother_id')) {
         df[df[['mouse_id']]==df[[col]], c('father_id', 'mother_id')] <- 0
     }
-   
+
+    # ----------------------------------------------------------------------
+    # Standardize dates
+    
     df[['dob']] <- sapply(df[['dob']], standardize_dates)
     df[['dod']] <- sapply(df[['dod']], standardize_dates)
 
@@ -188,10 +222,12 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
         }
     }
 
-    # autoassign colors
+    # ----------------------------------------------------------------------
+    # Assign colors
+
     if (!('color' %in% colnames(df))) {
         strains <- sort(unique(df[['strain']]))
-        n_strains = length(strains)
+        n_strains = max(length(strains), 3)
         strains_to_color = colorRampPalette(
             brewer.pal(n = min(n_strains, 9), name = "Set1")
         )(n_strains)

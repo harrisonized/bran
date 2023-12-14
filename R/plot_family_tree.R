@@ -7,9 +7,9 @@ library('logr')
 import::from(kinship2,'pedigree')
 import::from(file.path(wd, 'R', 'functions', 'preprocessing.R'),
     'preprocessing', .character_only=TRUE)
-import::from(file.path(wd, 'R', 'utils', 'file_io.R'),
+import::from(file.path(wd, 'R', 'tools', 'file_io.R'),
     'read_excel_or_csv', .character_only=TRUE)
-import::from(file.path(wd, 'R', 'utils', 'df_tools.R'),
+import::from(file.path(wd, 'R', 'tools', 'df_tools.R'),
     'get_unique_values', 'fillna', .character_only=TRUE)
 
 # ----------------------------------------------------------------------

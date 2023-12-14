@@ -5,9 +5,9 @@ wd = dirname(this.path::here())  # wd = '~/github/R/bran'
 suppressPackageStartupMessages(library('dplyr'))
 library('optparse')
 library('logr')
-import::here(file.path(wd, 'R', 'utils', 'file_io.R'),
+import::here(file.path(wd, 'R', 'tools', 'file_io.R'),
     'read_excel_or_csv', .character_only=TRUE)
-import::here(file.path(wd, 'R', 'utils', 'list_tools.R'),
+import::here(file.path(wd, 'R', 'tools', 'list_tools.R'),
     'items_in_a_not_b', .character_only=TRUE)
 import::here(file.path(wd, 'R', 'functions', 'preprocessing.R'),
     'generate_missing_parents', 'preprocessing', .character_only=TRUE)

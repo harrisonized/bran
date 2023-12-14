@@ -9,6 +9,7 @@ Install the following packages in R:
 
 ```R
 install.packages('kinship2')
+install.packages('plyr')
 install.packages('dplyr')
 install.packages('wrapr')
 install.packages("readxl")
@@ -21,7 +22,7 @@ install.packages("optparse")
 1.	**Test that this repository runs.** Use the included file `sample_ped_tab.csv`:
 
 	```bash
-	Rscript R/plot_family_tree.R -i data/sample_ped_tab.csv -p 1 -s
+	Rscript R/plot_family_tree.R -i data/sample_ped_tab.csv -p 1
 	```
 
 2.	**Plot the family tree.** Use the "Export to Excel" function in the Dashboard/Mouse section of Transnetyx to obtain a `My_Mice.xlsx` file. Move it into `data`, then run the same script as above.	
