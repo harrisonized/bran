@@ -104,6 +104,9 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
 
     # cleanup mouse ids
     df <- df[!grepl('Count: ', df[['mouse_id']]), ]  # drop filler rows
+    if (typeof(df[['mouse_id']]) == "character") {
+        df[['mouse_id']] = gsub(' |\\.', '', df[['mouse_id']])
+    }
     df[['mouse_id']] <- as.numeric(df[['mouse_id']])
     df <- df[which(!is.na(df[, 'mouse_id'])), ]  # drop mice with missing IDs
     df <- df[!duplicated(df[['mouse_id']]), ]  # drop duplicated mice
@@ -173,6 +176,9 @@ preprocessing <- function(df, impute_missing_parents=TRUE) {
 
     # fix data types
     for (col in c('father_id', 'mother_id')) {
+        if (typeof(df[[col]]) == "character") {
+            df[[col]] = gsub(' |\\.', '', df[[col]])
+        }
         df[[col]] <- as.numeric(df[[col]])
     }
 

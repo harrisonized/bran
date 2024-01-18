@@ -40,7 +40,6 @@ check_if_a_in_b <- function(a, b) {
 #' @examples
 #' filter_list_for_match(c("a_suffix", "b_suffix", "c"), "suffix")
 #' 
-
 #' @export
 filter_list_for_match <- function(items, patterns) {
     # filter
