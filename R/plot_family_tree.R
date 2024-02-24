@@ -11,6 +11,9 @@ import::from(file.path(wd, 'R', 'tools', 'file_io.R'),
     'read_excel_or_csv', .character_only=TRUE)
 import::from(file.path(wd, 'R', 'tools', 'df_tools.R'),
     'get_unique_values', 'fillna', .character_only=TRUE)
+import::from(file.path(wd, 'R', 'functions', 'computations.R'),
+    'generate_display_text', .character_only=TRUE)
+
 
 # ----------------------------------------------------------------------
 # Pre-script settings
@@ -20,14 +23,18 @@ option_list = list(
     make_option(c("-i", "--input-file"), default='data/sample_ped_tab.csv',
                 metavar='data/sample_ped_tab.csv',
                 type="character",help="path/to/input/file"),
-   
-    make_option(c("-o", "--output-dir"), default="figures",
-                metavar="figures", type="character",
+
+    make_option(c("-o", "--output-dir"), default="data/output",
+                metavar="data/output", type="character",
                 help="set the output directory for the data"),
+
+    make_option(c("-f", "--figures-dir"), default="figures",
+                metavar="figures", type="character",
+                help="set the output directory for the figures"),
 
     make_option(c("-l", "--height"), default=3000,
                 metavar="3000", type="integer",
-                help="height in px, -h is protected, -l for length"),
+                help="height in px"),
 
     make_option(c("-w", "--width"), default=5000,
                 metavar="5000", type="integer",
@@ -39,7 +46,7 @@ option_list = list(
 
     make_option(c("-p", "--ploidy"), default=2,
                 metavar="2", type="integer",
-                help="ploidy: 1 = homozygous, 2 = heterozygous"),
+                help="Split circle? Choose 1 or 2."),
 
     make_option(c("-j", "--jpg"), default=FALSE, action="store_true",
                 metavar="FALSE", type="logical",
@@ -64,6 +71,15 @@ if (opt[['width']] > 200000) {
     opt[['width']] = 200000
 }
 
+# switch
+if (opt[['jpg']]) {
+    ext <- '.jpg'
+    img <- jpeg
+} else {
+    ext <- '.png'
+    img <- png
+}
+
 # Start Log
 start_time = Sys.time()
 log <- log_open(paste0("plot_family_tree-",
@@ -77,15 +93,13 @@ log_print(paste('Script started at:', start_time))
 df = read_excel_or_csv(file.path(wd, opt[['input-file']]))
 df <- preprocessing(df)
 
-
 # save
 if (!troubleshooting) {
-    directory = file.path(wd, dirname(opt[['input-file']]), 'troubleshooting')
-    if (!dir.exists(directory)) {
-        dir.create(directory, recursive=TRUE)
+    if (!dir.exists(opt[['output-dir']])) {
+        dir.create(opt[['output-dir']], recursive=TRUE)
     }
     filepath = file.path(
-        directory,
+        opt[['output-dir']],
         paste0('_', tools::file_path_sans_ext(basename(opt[['input-file']])), '.csv')  # filename
     )
     write.table(df, file = filepath, row.names = FALSE, sep = ',' )
@@ -95,8 +109,7 @@ if (!troubleshooting) {
 # ----------------------------------------------------------------------
 # Create Pedigree
 
-
-# ignore certain mice
+# show or ignore mice
 parents = get_unique_values(df, c('father_id', 'mother_id'))
 if (opt[['show-all']]) {
     df[['ignore']] = 0
@@ -110,7 +123,6 @@ if (opt[['show-dead']]) {
 }
 df <- df[!mask, ]  # filter
 
-
 tree <- pedigree(
     id = df[['mouse_id']],
     dadid = df[['father_id']],
@@ -120,43 +132,22 @@ tree <- pedigree(
 )[1]
 
 
-# set names
-if (basename(opt[['input-file']]) == 'sample_ped_tab.csv') {
-    names = df[['mouse_id']]
-} else {
-    rack_names = gsub(".* ([0-9]+[Aa|Bb]).*", "\\1", df[['rack']])  # regex match Rack 1A
-    positions = ifelse((df[['position']]=='Unassigned'), NA, df[['position']])
-    names = paste0(
-        df[['mouse_id']], '\n',
-        rack_names, ', ', positions, '\n',
-        strftime(as.Date(df[['dob']], "%m/%d/%Y"), "%m/%d/%y"), '\n',
-        df[['age']], 'd'
-    )
-}
+display_text <- generate_display_text(df)
 
-# construct affected matrix
-if (opt[['ploidy']] == 1) {
-    affected <- df[["pcr_confirmation"]]
+# fill in circles
+if (opt[['ploidy']] >= 2) {
+    fill <- as.matrix(df[, c('chr_m', 'chr_p')])  # default
 } else {
-    # defaults to 2
-    affected <- as.matrix(df[, c('chr_m', 'chr_p')])
+    fill <- df[["pcr_confirmation"]]
 }
 
 # save
 if (!troubleshooting) {
-    directory = file.path(wd, opt[['output-dir']])
+    directory = file.path(wd, opt[['figures-dir']])
     if (!dir.exists(directory)) {
         dir.create(directory, recursive=TRUE)
     }
 
-    # switch
-    if (opt[['jpg']]) {
-        ext = '.jpg'
-        img <- jpeg
-    } else {
-        ext = '.png'
-        img <- png
-    }
     filepath = file.path(
         directory,  # dir
         paste0(tools::file_path_sans_ext(basename(opt[['input-file']])), ext)  # filename
@@ -169,8 +160,8 @@ if (!troubleshooting) {
     )
 
     plot(tree,
-         id = names,
-         affected = affected,
+         id = display_text,
+         affected = fill,
          status = 1-df[['alive']],
          col = df[['color']],
          symbolsize = 0.8,
