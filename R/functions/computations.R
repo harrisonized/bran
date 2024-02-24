@@ -2,7 +2,7 @@ import::here(RColorBrewer, 'brewer.pal')
 import::here(file.path(wd, 'R', 'tools', 'df_tools.R'),
     'get_unique_values', .character_only=TRUE)
 import::here(file.path(wd, 'R', 'functions', 'formatting.R'),
-    'standardize_dates', .character_only=TRUE)
+    'standardize_dates', 'days_to_ywd', .character_only=TRUE)
 
 ## Functions
 ## generate_missing_parents
@@ -103,7 +103,7 @@ generate_display_text <- function(df) {
             df[['mouse_id']], '\n',
             rack_names, ', ', positions, '\n',
             strftime(as.Date(df[['dob']], "%m/%d/%Y"), "%m/%d/%y"), '\n',
-            df[['age']], 'd'
+            unname(sapply(df[['age']], function(x) days_to_ywd(x)))
         )
     } else {
         display_text = df[['mouse_id']]
