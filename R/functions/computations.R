@@ -94,17 +94,23 @@ assign_colors <- function(df) {
 #' @description
 #' mouse id, rack name, position, age
 #' 
-generate_display_text <- function(df) {
+generate_display_text <- function(df, id_only=FALSE) {
 
     if (basename(opt[['input-file']]) != 'sample_ped_tab.csv') {
         rack_names = gsub(".* ([0-9]+[Aa|Bb]).*", "\\1", df[['rack']])  # regex match Rack 1A
         positions = ifelse((df[['position']]=='Unassigned'), NA, df[['position']])
-        display_text = paste0(
-            df[['mouse_id']], '\n',
-            rack_names, ', ', positions, '\n',
-            strftime(as.Date(df[['dob']], "%m/%d/%Y"), "%m/%d/%y"), '\n',
-            unname(sapply(df[['age']], function(x) days_to_ywd(x)))
-        )
+
+        if (id_only==TRUE) {
+            display_text = df[['mouse_id']]
+        } else {
+            display_text = paste0(
+                df[['mouse_id']], '\n',
+                rack_names, ', ', positions, '\n',
+                strftime(as.Date(df[['dob']], "%m/%d/%Y"), "%m/%d/%y"), '\n',
+                unname(sapply(df[['age']], function(x) days_to_ywd(x)))
+            )
+        }
+ 
     } else {
         display_text = df[['mouse_id']]
     }

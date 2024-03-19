@@ -132,7 +132,7 @@ tree <- pedigree(
 )[1]
 
 
-display_text <- generate_display_text(df)
+display_text <- generate_display_text(df, id_only=FALSE)
 
 # fill in circles
 if (opt[['ploidy']] >= 2) {
@@ -166,7 +166,7 @@ if (!troubleshooting) {
          col = df[['color']],
          symbolsize = 0.8,
          cex = opt[['cex']],
-         branch = 1,
+         branch = 0.8,
          angle = rep(0, length(df)),
          density = rep(100, length(df))
     )
