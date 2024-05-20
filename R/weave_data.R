@@ -38,7 +38,7 @@ opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 troubleshooting = opt[['troubleshooting']]
 
-cols_to_update = c('age', 'genotype', 'labels', 'cage_id', 'notes', 'rack', 'position')
+cols_to_update = c('age', 'genotype', 'labels', 'cage_id', 'notes', 'system_id', 'rack', 'position')
 
 # Start Log
 start_time = Sys.time()

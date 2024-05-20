@@ -30,7 +30,8 @@ col_to_new_col = c(
     'id'='mouse_id',
     'ped'='strain',
     "avail"="dead",
-    'affected'='pcr_confirmation'
+    'affected'='pcr_confirmation',
+    "systemid"="system_id"
 )
 
 
