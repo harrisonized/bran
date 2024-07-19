@@ -105,6 +105,7 @@ generate_display_text <- function(df, id_only=FALSE) {
         } else {
             display_text = paste0(
                 df[['mouse_id']], '\n',
+                df[['cage_id']], '\n',
                 rack_names, ', ', positions, '\n',
                 strftime(as.Date(df[['dob']], "%m/%d/%Y"), "%m/%d/%y"), '\n',
                 unname(sapply(df[['age']], function(x) days_to_ywd(x)))
