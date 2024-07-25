@@ -170,6 +170,10 @@ clean_parent_ids <- function(df, impute_missing_parents=TRUE) {
     df <- fillna(df, c('father_id', 'mother_id', 'ignore'), 0)
     df <- fillna(df, c('alive'), 1)
 
+    # Subjects must have both a father and mother, or have neither
+    df[df[['father_id']] == 0, 'mother_id'] <- 0 
+    df[df[['mother_id']] == 0, 'father_id'] <- 0
+    
     # remove self parents
     for (col in c('father_id', 'mother_id')) {
         df[df[['mouse_id']]==df[[col]], c('father_id', 'mother_id')] <- 0
