@@ -21,7 +21,7 @@ import::here(readxl, 'read_excel')
 read_excel_or_csv <- function(filepath) {
     ext=tools::file_ext(filepath)
     if (ext == 'xlsx') {
-        df <- read_excel(filepath)
+        df <- read_excel(filepath, .name_repair = "unique_quiet")
     } else if (ext == 'csv') {
         df <- read.csv(filepath, header=TRUE)
     } else {

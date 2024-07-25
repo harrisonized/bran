@@ -3,7 +3,7 @@
 
 wd = dirname(this.path::here())  # wd = '~/github/R/bran'
 library('optparse')
-library('logr')
+suppressPackageStartupMessages(library('logr'))
 import::from(kinship2,'pedigree')
 import::from(file.path(wd, 'R', 'functions', 'preprocessing.R'),
     'preprocessing', .character_only=TRUE)
@@ -159,19 +159,25 @@ if (!troubleshooting) {
         res = 1200, pointsize = 5
     )
 
-    plot(tree,
-         id = display_text,
-         affected = fill,
-         status = 1-df[['alive']],
-         col = df[['color']],
-         symbolsize = 0.8,
-         cex = opt[['cex']],
-         branch = 0.8,
-         angle = rep(0, length(df)),
-         density = rep(100, length(df))
-    )
+    withCallingHandlers({
+        plot(tree,
+             id = display_text,
+             affected = fill,
+             status = 1-df[['alive']],
+             col = df[['color']],
+             symbolsize = 0.8,
+             cex = opt[['cex']],
+             branch = 0.8,
+             angle = rep(0, length(df)),
+             density = rep(100, length(df))
+        )
+    }, warning=function(w) {
+        if ( any(grepl("no non-missing arguments", w)) ) {
+            invokeRestart("muffleWarning")
+        }
+    })
 
-    dev.off()
+    tmp <- dev.off()
 }
 
 end_time = Sys.time()
