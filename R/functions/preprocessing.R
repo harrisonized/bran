@@ -27,10 +27,10 @@ import::here(file.path(wd, 'R', 'functions', 'computations.R'),
 preprocessing <- function(df, impute_missing_parents=TRUE) {
 
     df <- clean_column_names(df)
-    df <- impute_required_columns(df)
+    df <- clean_mouse_ids(df)
     df <- clean_text_columns(df)
 
-    df <- clean_mouse_ids(df)
+    df <- impute_required_columns(df)
     df <- clean_parent_ids(df, impute_missing_parents)
     df <- calculate_age(df)
 

@@ -3,7 +3,7 @@
 
 wd = dirname(this.path::here())  # wd = '~/github/R/bran'
 library('optparse')
-library('logr')
+suppressPackageStartupMessages(library('logr'))
 import::from(dplyr, 'anti_join')
 import::here(file.path(wd, 'R', 'tools', 'file_io.R'),
     'read_excel_or_csv', .character_only=TRUE)
