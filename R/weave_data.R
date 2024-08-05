@@ -22,7 +22,7 @@ option_list = list(
                 metavar='data/initial_data.csv',
                 type="character", help="the data you had before, including past annotations"),
 
-    make_option(c("-n", "--new-data"), default='data/My_Mice.xlsx',
+    make_option(c("-n", "--new-data"), default='data/Tussiwand_Mice.xlsx',
                 metavar='data/My_Mice.xlsx',
                 type="character", help="new file downloaded directly from transnetyx"),
     
@@ -89,7 +89,7 @@ if (!troubleshooting) {
 
     # missing mice
     write.table(
-        missing_mice,
+        missing_mice[(missing_mice[['alive']]==1), ],
         file = file.path(paste0(tools::file_path_sans_ext(filepath), '-missing', '.csv')),
         row.names = FALSE, sep = ','
     )
