@@ -95,11 +95,11 @@ df <- preprocessing(df)
 
 # save
 if (!troubleshooting) {
-    if (!dir.exists(opt[['output-dir']])) {
-        dir.create(opt[['output-dir']], recursive=TRUE)
+    if (!dir.exists(file.path(wd, opt[['output-dir']]))) {
+        dir.create(file.path(wd, opt[['output-dir']]), recursive=TRUE)
     }
     filepath = file.path(
-        opt[['output-dir']],
+        wd, opt[['output-dir']],
         paste0('_', tools::file_path_sans_ext(basename(opt[['input-file']])), '.csv')  # filename
     )
     write.table(df, file = filepath, row.names = FALSE, sep = ',' )

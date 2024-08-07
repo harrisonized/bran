@@ -106,14 +106,22 @@ clean_column_names <- function(df) {
 
 #' Standardize Text Columns
 #' 
-#' @description clean up notes field, remove first newline
+#' @description clean up text fields
 #' 
 clean_text_columns <- function(df, col='notes') {
     
     if (col %in% colnames(df)) {
+
+        # remove newlines
         df[[col]] <- unlist(
-            lapply(df[[col]], function(x) sub("\r\n*|\n*|\r*", "", x))
-        )  
+            lapply(df[[col]], function(x) gsub("\r|\n|\r\n", "", x))
+        )
+
+        # replace quotes within text field of a csv
+        df[[col]] <- unlist(
+            lapply(df[[col]], function(x) gsub('"', "'", x))
+        )
+
     }
     return(df)
 }
