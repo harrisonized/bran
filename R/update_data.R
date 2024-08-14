@@ -1,4 +1,4 @@
-## Weave the new and old data together
+## Use the new data to update the old data
 ## Automatically outputs to the troubleshooting folder
 
 wd = dirname(this.path::here())  # wd = '~/github/R/bran'
@@ -24,7 +24,7 @@ option_list = list(
 
     make_option(c("-n", "--new-data"), default='data/Tussiwand_Mice.xlsx',
                 metavar='data/My_Mice.xlsx',
-                type="character", help="new file downloaded directly from transnetyx"),
+                type="character", help="new file downloaded directly from Transnetyx"),
     
     make_option(c("-o", "--output-dir"), default='data/output',
                 metavar='data/output', type="character",
