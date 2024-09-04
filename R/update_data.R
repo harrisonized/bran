@@ -22,7 +22,7 @@ option_list = list(
                 metavar='data/initial_data.csv',
                 type="character", help="the data you had before, including past annotations"),
 
-    make_option(c("-n", "--new-data"), default='data/Tussiwand_Mice.xlsx',
+    make_option(c("-n", "--new-data"), default='data/My_Mice.xlsx',
                 metavar='data/My_Mice.xlsx',
                 type="character", help="new file downloaded directly from Transnetyx"),
     
@@ -38,11 +38,13 @@ opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 troubleshooting = opt[['troubleshooting']]
 
-cols_to_update = c('age', 'genotype', 'labels', 'cage_id', 'notes', 'system_id', 'rack', 'position')
+cols_to_update = c(
+    'use', 'age', 'genotype', 'labels', 'cage_id', 'notes', 'system_id', 'rack', 'position'
+)
 
 # Start Log
 start_time = Sys.time()
-log <- log_open(paste0("weave_data-",
+log <- log_open(paste0("update_data-",
                        strftime(start_time, format="%Y%m%d_%H%M%S"), '.log'))
 log_print(paste('Script started at:', start_time))
 
