@@ -4,12 +4,13 @@
 wd = dirname(this.path::here())  # wd = '~/github/R/bran'
 library('optparse')
 suppressPackageStartupMessages(library('logr'))
+import::from(plyr, 'rbind.fill')
 import::from(dplyr, 'anti_join')
-import::here(file.path(wd, 'R', 'tools', 'file_io.R'),
+import::from(file.path(wd, 'R', 'tools', 'file_io.R'),
     'read_excel_or_csv', .character_only=TRUE)
-import::here(file.path(wd, 'R', 'tools', 'list_tools.R'),
+import::from(file.path(wd, 'R', 'tools', 'list_tools.R'),
     'items_in_a_not_b', .character_only=TRUE)
-import::here(file.path(wd, 'R', 'functions', 'preprocessing.R'),
+import::from(file.path(wd, 'R', 'functions', 'preprocessing.R'),
     'preprocessing', .character_only=TRUE)
 
 
@@ -22,7 +23,7 @@ option_list = list(
                 metavar='data/initial_data.csv',
                 type="character", help="the data you had before, including past annotations"),
 
-    make_option(c("-n", "--new-data"), default='data/My_Mice.xlsx',
+    make_option(c("-n", "--new-data"), default='data/Tussiwand_Mice.xlsx',
                 metavar='data/My_Mice.xlsx',
                 type="character", help="new file downloaded directly from Transnetyx"),
     
@@ -63,8 +64,8 @@ missing_mice <- anti_join(old_data, new_data, by='mouse_id')
 new_mice <- anti_join(new_data, old_data, by='mouse_id')
 
 # merge, overwrite cols_to_update using new_data
-new_data <- rbind(new_data, missing_mice)  # add missing_mice to new_data
-old_data <- rbind(old_data, new_mice)  # add new_mice to old_data
+new_data <- rbind.fill(new_data, missing_mice)  # add missing_mice to new_data
+old_data <- rbind.fill(old_data, new_mice)  # add new_mice to old_data
 df <- merge(
     old_data[, c(items_in_a_not_b(colnames(old_data), cols_to_update))],
     new_data[, c('mouse_id', cols_to_update)],
