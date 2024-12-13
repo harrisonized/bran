@@ -7,6 +7,8 @@ suppressPackageStartupMessages(library('logr'))
 import::from(kinship2,'pedigree')
 import::from(file.path(wd, 'R', 'functions', 'preprocessing.R'),
     'preprocessing', .character_only=TRUE)
+import::from(file.path(wd, 'R', 'functions', 'cleanup.R'),
+    'filter_extinct_families', .character_only=TRUE)
 import::from(file.path(wd, 'R', 'tools', 'file_io.R'),
     'read_excel_or_csv', .character_only=TRUE)
 import::from(file.path(wd, 'R', 'tools', 'df_tools.R'),
@@ -110,18 +112,14 @@ if (!troubleshooting) {
 # Create Pedigree
 
 # show or ignore mice
-parents = get_unique_values(df, c('father_id', 'mother_id'))
 if (opt[['show-all']]) {
     df[['ignore']] = 0
 }
-if (opt[['show-dead']]) {
-    mask = !(df[['mouse_id']] %in% parents) &
-            (df[['ignore']] == 1)
-} else {
-    mask = !(df[['mouse_id']] %in% parents) &
-            ((df[['ignore']] == 1) | (df[['alive']] == 0))
+if (!opt[['show-dead']]) {
+    df[(df[['alive']] == 0) & (df[['ignore']] == 0), 'ignore'] <- 1  # ignore dead by default
 }
-df <- df[!mask, ]  # filter
+df <- filter_extinct_families(df)
+
 
 tree <- pedigree(
     id = df[['mouse_id']],

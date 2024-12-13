@@ -20,6 +20,7 @@ import::here(file.path(wd, 'R', 'functions', 'computations.R'),
 ## clean_text_columns
 ## clean_mouse_ids
 ## clean_parent_ids
+## filter_extinct_families
 
 
 #' used to match data from sample_ped_tab.csv to transnetyx output
@@ -185,6 +186,27 @@ clean_parent_ids <- function(df, impute_missing_parents=TRUE) {
     # remove self parents
     for (col in c('father_id', 'mother_id')) {
         df[df[['mouse_id']]==df[[col]], c('father_id', 'mother_id')] <- 0
+    }
+
+    return(df)
+}
+
+
+#' Filter extinct families
+#' 
+#' requires the following columns: mouse_id, father_id, mother_id, ignore
+#' 
+filter_extinct_families <- function(df) {
+
+    parents = get_unique_values(df, c('father_id', 'mother_id'))
+    n_parents = length(parents)
+    n_parents_prev <- 0
+
+    while (n_parents_prev != n_parents) {
+        n_parents_prev <- n_parents
+        df <- df[(df[['mouse_id']] %in% parents) | (df[['ignore']] == 0), ]  # filter
+        parents <- get_unique_values(df, c('father_id', 'mother_id'))
+        n_parents = length(parents)
     }
 
     return(df)
