@@ -89,6 +89,8 @@ log <- log_open(paste0("plot_family_tree-",
 log_print(paste('Script started at:', start_time))
 
 
+# i added a new line
+
 # ----------------------------------------------------------------------
 # Read Data
 
