@@ -34,12 +34,12 @@ option_list = list(
                 metavar="figures", type="character",
                 help="set the output directory for the figures"),
 
-    make_option(c("-l", "--height"), default=3000,
-                metavar="3000", type="integer",
+    make_option(c("-l", "--height"), default=5000,
+                metavar="5000", type="integer",
                 help="height in px"),
 
-    make_option(c("-w", "--width"), default=5000,
-                metavar="5000", type="integer",
+    make_option(c("-w", "--width"), default=10000,
+                metavar="10000", type="integer",
                 help="width in px, max width is 200000"),
 
     make_option(c("-c", "--cex"), default=0.6,
@@ -123,6 +123,7 @@ if (!opt[['show-dead']]) {
 df <- filter_extinct_families(df)
 
 
+# insert a code comment
 tree <- pedigree(
     id = df[['mouse_id']],
     dadid = df[['father_id']],
